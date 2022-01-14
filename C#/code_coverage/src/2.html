@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/danielpavez/Documents/Portfolio/C#/Challenge.Tests/StockTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Collections.Generic;
+using Challenge;
+using Xunit;
+
+namespace ChallengeTests;
+
+public class StockTests
+{
+    [Fact]
+    public void TryAddPrice_ShouldAddAPrice()
+    {
+        // Arrange
+        Stock stock = new Stock(&quot;Fintual&quot;);
+        DateOnly date = DateOnly.FromDateTime(DateTime.Now);
+        decimal price = 1;
+        
+        // Act
+        var isAdded = stock.TryAddPrice(date, price);
+        
+        // Assert
+        Assert.True(isAdded);
+    }
+    
+    [Fact]
+    public void TryAddPrice_ShouldAddPriceForDifferentDates()
+    {
+        // Arrange
+        Stock stock = new Stock(&quot;Fintual&quot;);
+        
+        DateOnly date1 = DateOnly.FromDateTime(DateTime.Now);
+        decimal price1 = 1.1m;
+
+        DateOnly date2 = date1.AddDays(1);
+        decimal price2 = 2.2m;
+        
+        // Act
+        var isAdded1 = stock.TryAddPrice(date1, price1);
+        var isAdded2 = stock.TryAddPrice(date2, price2);
+        
+        // Assert
+        Assert.True(isAdded1);
+        Assert.True(isAdded2);
+    }
+    
+    [Fact]
+    public void TryAddPrice_ShouldNotAddPricesOnTheSameDate()
+    {
+        // Arrange
+        Stock stock = new Stock(&quot;Fintual&quot;);
+        
+        DateOnly date = DateOnly.FromDateTime(DateTime.Now);
+        
+        decimal price1 = 1.1m;
+        decimal price2 = 2.2m;
+        
+        // Act
+        var isAdded1 = stock.TryAddPrice(date, price1);
+        var isAdded2 = stock.TryAddPrice(date, price2);
+        
+        // Assert
+        Assert.True(isAdded1);
+        Assert.False(isAdded2);
+    }
+
+    [Fact]
+    public void Price_ShouldThrowException_IfArentPricesAdded()
+    {
+        // Arrange
+        Stock stock = new Stock(&quot;Fintual&quot;);
+        
+        DateOnly date1 = DateOnly.FromDateTime(DateTime.Now);
+        
+        // Act &amp; Assert
+        Assert.Throws&lt;KeyNotFoundException&gt;(() =&gt; stock.Price(date1));
+    }
+    
+    
+    [Fact]
+    public void Price_ShouldGetTheCorrectPriceForAGivenDate()
+    {
+        // Arrange
+        Stock stock = new Stock(&quot;Fintual&quot;);
+        
+        DateOnly date1 = DateOnly.FromDateTime(DateTime.Now);
+        decimal price1 = 1.1m;
+
+        DateOnly date2 = date1.AddYears(1);
+        decimal price2 = 2.2m;
+        
+        stock.TryAddPrice(date1, price1);
+        stock.TryAddPrice(date2, price2);
+        
+        // Act
+        var result1 = stock.Price(date1);
+        var result2 = stock.Price(date2);
+        
+        // Assert
+        Assert.Equal(price1, result1);
+        Assert.Equal(price2, result2);
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,5,12,6,1],[14,9,14,44,1],[15,9,15,61,1],[16,9,16,27,1],[19,9,19,54,1],[22,9,22,30,1],[23,5,23,6,1],[27,5,27,6,1],[29,9,29,44,1],[31,9,31,62,1],[32,9,32,31,1],[34,9,34,43,1],[35,9,35,31,1],[38,9,38,57,1],[39,9,39,57,1],[42,9,42,31,1],[43,9,43,31,1],[44,5,44,6,1],[48,5,48,6,1],[50,9,50,44,1],[52,9,52,61,1],[54,9,54,31,1],[55,9,55,31,1],[58,9,58,56,1],[59,9,59,56,1],[62,9,62,31,1],[63,9,63,32,1],[64,5,64,6,1],[68,5,68,6,1],[70,9,70,44,1],[72,9,72,62,1],[75,9,75,51,1],[75,51,75,69,1],[75,69,75,71,1],[76,5,76,6,1],[81,5,81,6,1],[83,9,83,44,1],[85,9,85,62,1],[86,9,86,31,1],[88,9,88,44,1],[89,9,89,31,1],[91,9,91,42,1],[92,9,92,42,1],[95,9,95,42,1],[96,9,96,42,1],[99,9,99,39,1],[100,9,100,39,1],[101,5,101,6,1]]);
+    </script>
+  </body>
+</html>

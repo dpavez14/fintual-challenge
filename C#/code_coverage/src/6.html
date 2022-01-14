@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/danielpavez/Documents/Portfolio/C#/Challenge/Portfolio.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Challenge;
+
+public class Portfolio
+{
+    /// &lt;summary&gt;
+    /// Instance variable &lt;c&gt;_stocks&lt;/c&gt; represents the stocks of the portfolio associated with the
+    /// amount acquired.
+    /// &lt;/summary&gt;
+    private readonly Dictionary&lt;Stock, decimal&gt; _stocks;
+
+    /// &lt;summary&gt;
+    /// Initialize a new Portfolio without stocks bought.
+    /// &lt;/summary&gt;
+    public Portfolio()
+    {
+        _stocks = new Dictionary&lt;Stock, decimal&gt;();
+    }
+
+    /// &lt;summary&gt;
+    /// Adds a certain &lt;paramref name=&quot;amount&quot;/&gt; of the given &lt;paramref name=&quot;stock&quot;/&gt; to the portfolio.
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;stock&quot;&gt;Stock to add.&lt;/param&gt;
+    /// &lt;param name=&quot;amount&quot;&gt;Amount to add of the given stock.&lt;/param&gt;
+    /// &lt;returns&gt;The current total amount of the stock in the portfolio.&lt;/returns&gt;
+    /// &lt;exception cref=&quot;ArgumentOutOfRangeException&quot;&gt;If the &lt;paramref name=&quot;amount&quot;/&gt; is 0 or negative.&lt;/exception&gt;
+    public decimal AddStock(Stock stock, decimal amount)
+    {
+        if (amount &lt;= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(amount), &quot;The given amount must be above 0&quot;);
+        }
+        if (_stocks.ContainsKey(stock))
+        {
+            _stocks[stock] += amount;
+        }
+        else
+        {
+            _stocks.Add(stock, amount);
+        }
+
+        return _stocks[stock];
+    }
+
+    /// &lt;summary&gt;
+    /// By default calculate the annualized return of the portfolio, if &lt;paramref name=&quot;isAnnualized&quot;/&gt; is set to
+    /// &lt;c&gt;false&lt;/c&gt;, calculate the cumulative return instead.
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;start&quot;&gt;Initial date of the period.&lt;/param&gt;
+    /// &lt;param name=&quot;end&quot;&gt;Final date of the period.&lt;/param&gt;
+    /// &lt;param name=&quot;isAnnualized&quot;&gt;If &lt;c&gt;true&lt;/c&gt; calculate the annualized return; otherwise, calculate the cumulative return.&lt;/param&gt;
+    /// &lt;returns&gt;The profit of the portfolio (annualized or cumulative).&lt;/returns&gt;
+    /// &lt;exception cref=&quot;ArgumentException&quot;&gt;If &lt;paramref name=&quot;end&quot;/&gt; is a date before &lt;paramref name=&quot;start&quot;/&gt;.&lt;/exception&gt;
+    public decimal Profit(DateOnly start, DateOnly end, bool isAnnualized = true)
+    {
+        if (end &lt; start)
+        {
+            throw new ArgumentException($&quot;The parameter {nameof(end)} is a date before {nameof(start)}&quot;);
+        }
+        
+        return isAnnualized ?
+            AnnualizedReturn(start, end) :
+            CumulativeReturn(start, end);
+    }
+
+    /// &lt;summary&gt;
+    /// Calculate the cumulative return between the dates given.&lt;br/&gt;
+    /// See: &lt;see href=&quot;https://www.investopedia.com/ask/answer/07/portfolio_calculations.asp#toc-calculating-the-percentage-return-of-your-portfolio&quot;&gt;
+    /// &#39;Calculating the Percentage Return of Your Portfolio&#39; on www.investopedia.com&lt;/see&gt;&lt;br/&gt;
+    /// See also: &lt;seealso href=&quot;https://www.investopedia.com/terms/c/cumulativereturn.asp&quot;&gt;
+    /// &#39;Cumulative Return&#39; on www.investopedia.com&lt;/seealso&gt;
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;start&quot;&gt;Initial date of the period.&lt;/param&gt;
+    /// &lt;param name=&quot;end&quot;&gt;Final date of the period.&lt;/param&gt;
+    /// &lt;returns&gt;The cumulative return of the portfolio.&lt;/returns&gt;
+    private decimal CumulativeReturn(DateOnly start, DateOnly end)
+    {
+        if (start &gt;= end || _stocks.Count &lt;= 0)
+        {
+            return 0;
+        }
+        
+        decimal startTotal = 0;
+        decimal endTotal = 0;
+        foreach (var stock in _stocks.Keys)
+        {
+            decimal stockAmount = _stocks[stock];
+            startTotal += stockAmount * stock.Price(start);
+            endTotal += stockAmount * stock.Price(end);
+        }
+
+        return (endTotal - startTotal) / startTotal;
+
+    }
+
+    /// &lt;summary&gt;
+    /// Calculate the annualized return between the dates given.&lt;br/&gt;
+    /// See: &lt;see href=&quot;https://www.investopedia.com/terms/a/annualized-total-return.asp&quot;&gt;&#39;Annualized Total Return&#39; on www.investopedia.com&lt;/see&gt;
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;start&quot;&gt;Initial date of the period.&lt;/param&gt;
+    /// &lt;param name=&quot;end&quot;&gt;Final date of the period.&lt;/param&gt;
+    /// &lt;returns&gt;The annualized return of the portfolio.&lt;/returns&gt;
+    /// &lt;exception cref=&quot;OverflowException&quot;&gt;If the result of the calculation is over &lt;c&gt;decimal.MaxValue&lt;/c&gt;&lt;/exception&gt;
+    private decimal AnnualizedReturn(DateOnly start, DateOnly end)
+    {
+        decimal cumulativeReturn = CumulativeReturn(start, end);
+
+        switch (cumulativeReturn)
+        {
+            // The difference of start and end dates is in years
+            // Use the formula for yearly periods
+            case &gt; 0 when start.Month == end.AddDays(1).Month &amp;&amp; start.Day == end.AddDays(1).Day:
+            {
+                decimal yearsHeld = end.AddDays(1).Year - start.Year;
+                
+                double basePow = (double) (1m + cumulativeReturn);
+                double exponentPow = (double) (1m / yearsHeld);
+                return (decimal)Math.Pow(basePow, exponentPow) - 1m;
+            }
+            // The difference of start and end dates isn&#39;t exact years
+            // Use the formula with the difference of days instead
+            case &gt; 0:
+            {
+                DateTime dtStart = start.ToDateTime(TimeOnly.MinValue);
+                DateTime dtEnd = end.ToDateTime(TimeOnly.MinValue);
+                double daysHeld = (dtEnd - dtStart).Days;
+                
+                double basePow = (double) (1m + cumulativeReturn);
+                double exponentPow = 365 / daysHeld;
+                return (decimal)Math.Pow(basePow, exponentPow) - 1m;
+            }
+            default:
+                return 0;
+        }
+    }
+
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,5,14,23,1],[15,5,15,6,1],[16,9,16,52,1],[17,5,17,6,1],[27,5,27,6,1],[28,9,28,25,1],[29,9,29,10,1],[30,13,30,103,1],[32,9,32,40,1],[33,9,33,10,1],[34,13,34,38,1],[35,9,35,10,1],[37,9,37,10,1],[38,13,38,40,1],[39,9,39,10,1],[41,9,41,31,1],[42,5,42,6,1],[54,5,54,6,1],[55,9,55,25,1],[56,9,56,10,1],[57,13,57,106,1],[60,9,62,42,1],[63,5,63,6,1],[76,5,76,6,1],[77,9,77,48,1],[78,9,78,10,1],[79,13,79,22,1],[82,9,82,32,1],[83,9,83,30,1],[84,9,84,16,1],[84,18,84,27,1],[84,28,84,30,1],[84,31,84,43,1],[85,9,85,10,1],[86,13,86,50,1],[87,13,87,60,1],[88,13,88,56,1],[89,9,89,10,1],[91,9,91,53,1],[93,5,93,6,1],[104,5,104,6,1],[105,9,105,65,1],[107,9,107,34,1],[111,22,111,97,1],[112,13,112,14,1],[113,17,113,70,1],[115,17,115,67,1],[116,17,116,64,1],[117,17,117,69,1],[122,13,122,14,1],[123,17,123,72,1],[124,17,124,68,1],[125,17,125,58,1],[127,17,127,67,1],[128,17,128,53,1],[129,17,129,69,1],[132,17,132,26,1],[134,5,134,6,1]]);
+    </script>
+  </body>
+</html>
