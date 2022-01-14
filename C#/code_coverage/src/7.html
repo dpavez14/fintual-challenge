@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/danielpavez/Documents/Portfolio/C#/Challenge/Stock.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Challenge;
+
+public class Stock
+{
+    /// &lt;summary&gt;
+    /// Property &lt;c&gt;Name&lt;/c&gt; represent the name of the Stock.
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;The &lt;c&gt;Name&lt;/c&gt; of the stock should be unique&lt;/remarks&gt;
+    public string Name { get; }
+    
+    /// &lt;summary&gt;
+    /// Instance variable &lt;c&gt;_prices&lt;/c&gt; store the prices of the stock for different dates.
+    /// &lt;/summary&gt;
+    /// &lt;remarks&gt;The prices are set by days, so it doesn&#39;t consider the variations in shorter
+    /// periods of time like hours, minutes, seconds, milliseconds, etc., which could be the case
+    /// in a real-world exchange.&lt;/remarks&gt;
+    private readonly Dictionary&lt;DateOnly, decimal&gt; _prices;
+
+    /// &lt;summary&gt;
+    /// Initialize a new Stock with a given name and prices not set yet.
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;name&quot;&gt;Name of the stock.&lt;/param&gt;
+    /// &lt;remarks&gt;It&#39;s assumed that the name of the stock is unique.&lt;/remarks&gt;
+    public Stock(string name)
+    {
+        Name = name;
+        _prices = new Dictionary&lt;DateOnly, decimal&gt;();
+    }
+
+    /// &lt;summary&gt;
+    /// Sets the price of the stock in a certain date.
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;date&quot;&gt;Date to set the price.&lt;/param&gt;
+    /// &lt;param name=&quot;price&quot;&gt;Price to set.&lt;/param&gt;
+    /// &lt;returns&gt;Returns &lt;c&gt;true&lt;/c&gt; if the price was added successfully (wasn&#39;t set previously for the date given);
+    /// otherwise, &lt;c&gt;false&lt;/c&gt;.&lt;/returns&gt;
+    public bool TryAddPrice(DateOnly date, decimal price)
+    {
+        return _prices.TryAdd(date, price);
+    }
+
+    /// &lt;summary&gt;
+    /// Gets the price of the stock on a certain date.
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;date&quot;&gt;Date to get the price.&lt;/param&gt;
+    /// &lt;returns&gt;The price of the stock in the given date.&lt;/returns&gt;
+    /// &lt;exception cref=&quot;KeyNotFoundException&quot;&gt;If doesn&#39;t exist a price set on the given date.&lt;/exception&gt;
+    public decimal Price(DateOnly date)
+    {
+        return _prices[date];
+    }
+
+    /// &lt;summary&gt;
+    /// Returns the hash code for this &lt;c&gt;Stock&lt;/c&gt;.
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;A 32-bit signed integer hash code.&lt;/returns&gt;
+    /// &lt;remarks&gt;The &lt;c&gt;Name&lt;/c&gt; of the Stock should be unique.&lt;/remarks&gt;
+    public override int GetHashCode()
+    {
+        return Name.GetHashCode();
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,26,9,30,1],[24,5,24,30,1],[25,5,25,6,1],[26,9,26,21,1],[27,9,27,55,1],[28,5,28,6,1],[38,5,38,6,1],[39,9,39,44,1],[40,5,40,6,1],[49,5,49,6,1],[50,9,50,30,1],[51,5,51,6,1],[59,5,59,6,1],[60,9,60,35,1],[61,5,61,6,1]]);
+    </script>
+  </body>
+</html>
